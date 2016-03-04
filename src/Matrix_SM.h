@@ -6,8 +6,13 @@ void displayMatrixGame();
 void displayMatrixVictory();
 void displayMatrixGameOver();
 
+void displayOrbs();
 void generateOrbs();
+unsigned char pickColumn(unsigned char x);
+unsigned char pickColor(unsigned char c);
 void moveOrbDown();
+void clearMatrix();
+void clearGame();
 
 int matrixTick (int state);
 

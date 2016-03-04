@@ -12,7 +12,7 @@ enum startMatrixSubstates {
     Init_Start_SS,
     Display_Solid_SS,
     Display_Converge_SS
-    } startMatrixSubstate;
+    } startMatrixSubstate = Init_Start_SS;
 
 #define BALL_SIZE 8
 static unsigned char ball = 0;
@@ -37,22 +37,19 @@ static unsigned char convergeBallSelect_arr[CONV_SIZE] = {
 };
 
 void displayMatrixStart() {
-    static const unsigned short SOLID_PERIOD = 1500;
-    static const unsigned short CONVERGE_PERIOD = 1500;
-    static const unsigned short SOLID_STATE = 375;
-    static const unsigned short CONV_STATE = 375;
-
-    static unsigned char startMatrixSubstate = Init_Start_SS;
-    
+    const unsigned short SOLID_PERIOD = 1500;
+    const unsigned short CONVERGE_PERIOD = 1500;
+    const unsigned short SOLID_STATE = 375;
+    const unsigned short CONV_STATE = 375;
     static unsigned char i = 0;
     static unsigned short startTimer = 0;
     static unsigned char color_toggle = 0;
-    
     switch (startMatrixSubstate) {
         case(Init_Start_SS):
-            transmit_data(B_SR, 0x00);
-            transmit_data(TOP_SR, 0x00);
-            transmit_data(BOT_SR, 0x00);
+            clearMatrix();
+            startTimer = 0;
+            color_toggle = 0;
+            i = 0;
             startMatrixSubstate = Display_Converge_SS;
             break;
         case(Display_Converge_SS):
@@ -64,13 +61,8 @@ void displayMatrixStart() {
             }
             if (startTimer % CONV_STATE == 0) {
                 convergeBallSelect = convergeBallSelect_arr[i];
-                convergeBall = convergeBall_arr[i];
-                
-                /* to avoid "bleed-over" */
-                transmit_data(B_SR, 0x00);
-                transmit_data(TOP_SR, 0x00);
-                transmit_data(BOT_SR, 0x00);
-                
+                convergeBall = convergeBall_arr[i];        
+                clearMatrix();
                 transmit_data(B_SR, convergeBallSelect);
                 if (color_toggle) {
                     transmit_data(BOT_SR, convergeBall);
@@ -102,12 +94,7 @@ void displayMatrixStart() {
                      startTimer <= SOLID_STATE * 3) {
                 ballSelect = ballSelect_arr[i];
                 ball = ball_arr[i];
-                
-                /* to avoid "bleed-over" */
-                transmit_data(B_SR, 0x00);
-                transmit_data(TOP_SR, 0x00);
-                transmit_data(BOT_SR, 0x00);
-                
+                clearMatrix();
                 transmit_data(B_SR, ballSelect);
                 if (color_toggle) {
                     transmit_data(BOT_SR, ball);
@@ -135,8 +122,173 @@ void displayMatrixStart() {
      }                   
 }
 
+enum gameMatrixSubstates {
+    Init_Game_SS,
+    Play_Game_SS
+    } gameMatrixSubstate = Init_Game_SS;
+
+/* max collection of orbs */
+#define MAX_ORBS 12
+#define Y_BOUND 0x80
+/* holds column information of orb[i] */
+unsigned char greenOrbs = 0;
+unsigned char greenOrbs_arr[MAX_ORBS] = { 0 };
+unsigned char blueOrbs = 0;
+unsigned char blueOrbs_arr[MAX_ORBS] = { 0 };
+/* holds row information of orb[i] */
+unsigned char yControl = 0;
+unsigned char yControl_arr[MAX_ORBS];
+
+#define NUM_COLUMN 8
+#define NUM_COLORS 2
+#define BLUE_ORB 0
+#define GREEN_ORB 1
+unsigned long orbCount = 0;
+static unsigned char blueCount = 0;
+static unsigned char greenCount = 0;
+static unsigned long randSeed = 5294;
+
+unsigned char pickColumn(unsigned char x) {
+    unsigned char column;
+    if (x == 0) {
+        column = 0x01;
+    }
+    else if (x == 1) {
+        column = 0x02;
+    }
+    else if (x == 2) {
+        column = 0x04;
+    }
+    else if (x == 3) {
+        column = 0x08;
+    }
+    else if (x == 4) {
+        column = 0x10;
+    }
+    else if (x == 5) {
+        column = 0x20;
+    }
+    else if (x == 6) {
+        column = 0x40;
+    }
+    else if (x == 7) {
+        column = 0x80;
+    }
+    return column;
+}
+
+unsigned char pickColor(unsigned char c) {
+    unsigned char color;
+    if (c == 0) {
+        color = BLUE_ORB;
+    }
+    else if (c == 1) {
+        color = GREEN_ORB;
+    }
+    return color;
+}
+
+/* pick random (x) to generate one orb at -- populates array */
+/* tfw no vectors in C */
+void generateOrbs() {
+    if (orbCount < MAX_ORBS) {
+        const unsigned char topRow = 0x01;
+        unsigned char randomX = rand() % NUM_COLUMN;
+        unsigned char columnX = pickColumn(randomX);
+        unsigned char randomColor = rand() % NUM_COLORS;
+        unsigned char color = pickColor(randomColor);
+        
+        // find flagged Y to write to
+        for (unsigned i = 0; i < MAX_ORBS; ++i) {
+            if (yControl_arr[i] == 0x00 && color == BLUE_ORB) {
+                blueOrbs_arr[i] = columnX;
+                yControl_arr[i] = topRow;
+                ++orbCount;
+                break;
+            }
+            else if (yControl_arr[i] == 0x00 && color == GREEN_ORB) {
+                greenOrbs_arr[i] = columnX;
+                yControl_arr[i] = topRow;
+                ++orbCount;
+                break;
+            }
+        }
+    }  
+}
+
+/* shift all orbs down (y); checks if orb goes out of bounds and removes it */
+void moveOrbDown() {
+    // if oob orb flag it, shift non-oob orbs
+    for (unsigned short i = 0; i < MAX_ORBS; ++i) {
+        if (yControl_arr[i] >= Y_BOUND) {
+            if (orbCount > 0) {
+                --orbCount;
+                yControl_arr[i] = 0x00;
+                blueOrbs_arr[i] = 0x00;
+                greenOrbs_arr[i] = 0x00;
+            }
+            break;
+        }
+    }
+    for (unsigned short i = 0; i < MAX_ORBS; ++i) {
+        if (yControl_arr[i] != 0x00) {
+            yControl_arr[i] = yControl_arr[i] << 1;
+        }            
+    }
+}
+
+void displayOrbs() {
+    static unsigned short i = 0;
+    if (i >= MAX_ORBS) {
+        i = 0;
+    }
+    for (; i < MAX_ORBS; ++i) {
+        if (blueOrbs_arr[i] != 0x00) {
+            clearMatrix();
+            transmit_data(TOP_SR, blueOrbs_arr[i]);
+            transmit_data(B_SR, yControl_arr[i]);
+            ++i;
+            break;
+        }
+        if (greenOrbs_arr[i] != 0x00) {
+            clearMatrix();
+            transmit_data(BOT_SR, greenOrbs_arr[i]);
+            transmit_data(B_SR, yControl_arr[i]);
+            ++i;
+            break;
+        }
+    }
+}
+
 void displayMatrixGame() {
-    
+    const unsigned short GENERATE_PERIOD = 1000;
+    const unsigned short SHIFT_PERIOD = 750;
+    static unsigned short generateTimer = 0;
+    static unsigned short shiftTimer = 0;
+    switch(gameMatrixSubstate) {
+        case(Init_Game_SS):
+            generateTimer = 0;
+            shiftTimer = 0;
+            orbCount = 0;
+            gameMatrixSubstate = Play_Game_SS;
+            break;
+        case(Play_Game_SS):
+            displayOrbs();
+            if (generateTimer == GENERATE_PERIOD) {
+                generateOrbs();
+                generateTimer = 0;   
+            }
+            if (shiftTimer == SHIFT_PERIOD) {
+                moveOrbDown();
+                shiftTimer = 0;
+            }
+            ++generateTimer;
+            ++shiftTimer;      
+            break;
+         default:
+            gameMatrixSubstate = Init_Game_SS;
+            break;  
+    }
 }
 
 void displayMatrixVictory() {
@@ -147,53 +299,65 @@ void displayMatrixGameOver() {
     
 }
 
+void clearMatrix() {
+    transmit_data(B_SR, 0x00);
+    transmit_data(TOP_SR, 0x00);
+    transmit_data(BOT_SR, 0x00);
+}
+
+void clearGame() {
+    startMatrixSubstate = Init_Start_SS;
+    gameMatrixSubstate = Init_Game_SS;
+}
+
 int matrixTick (int state) {
     switch(state) {
         case(Init_Matrix):
-            srand(randomizer_seed);
-            transmit_data(B_SR, 0x00);
-            transmit_data(TOP_SR, 0x00);
-            transmit_data(BOT_SR, 0x00);
+            srand(randSeed);
+            clearMatrix();
             state = Start_Matrix;
             break;
         case(Start_Matrix):
             if (game_ctrl == PLAY_GAME) {
+                srand(randSeed);
+                clearMatrix();
                 state = Game_Matrix;
                 break;
             }
             else {
+               ++randSeed;
                displayMatrixStart();
             }
             state = Start_Matrix;
             break;
          case(Game_Matrix):
             if (game_ctrl == END_GAME) {
+                clearMatrix();
                 state = End_Matrix;
                 break;
             }
-            transmit_data(B_SR, 0x55);
-            transmit_data(TOP_SR, 0x55);
-            transmit_data(BOT_SR, 0x55);
             displayMatrixGame();
             state = Game_Matrix;
             break;
          case(End_Matrix):
             if (game_ctrl == RESET_GAME) {
+                clearMatrix();
                 state = Reset_Matrix;
                 break;
             }
             if (score >= MIN_SCORE) {
+                clearMatrix();
                 displayMatrixVictory();
             }
             else {
+                clearMatrix();
                 displayMatrixGameOver();
             }
             state = End_Matrix;
             break;
          case(Reset_Matrix):
-            transmit_data(B_SR, 0x00);
-            transmit_data(TOP_SR, 0x00);
-            transmit_data(BOT_SR, 0x00);
+            clearMatrix();
+            clearGame();
             state = Start_Matrix;
             break;
          default:
