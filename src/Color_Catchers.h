@@ -1,8 +1,8 @@
 #ifndef ___color_catchers_h__
 #define __color_catchers_h__
 
-#define DEFAULT_LIVES 5
-#define MIN_SCORE 15
+#define DEFAULT_LIVES 3
+unsigned short MIN_SCORE = 50;
 
 /* button input variables */
 unsigned char button_L = 0;
@@ -17,14 +17,10 @@ enum game_control {
     INIT_GAME, START_GAME, PLAY_GAME, END_GAME, RESET_GAME, 
     } game_ctrl;
     
-    
-enum color_phase {
-    Phase_Blue, Phase_Green
-    };
-    
 unsigned char update_LCD = 0;
 unsigned char moveLeftSignal = 0;
 unsigned char moveRightSignal = 0;
+unsigned char hitSignal = 0;
 
 unsigned short phase_timer = 0;
 #define CHANGE_PERIOD 100
@@ -33,19 +29,29 @@ unsigned short phase_timer = 0;
 
 /* shared variables */
 unsigned long score = 0;
-unsigned char lives = 0;
+unsigned short lives = 0;
 
-/* player */
-struct player_struct {
-    enum color_phase phase;
-    unsigned char playerLeft;
-    unsigned char playerRight;
-    };
+/* player's column and row info */
+unsigned char player_x = 0;
+const unsigned char player_y = 0x80;
+/* player color */
+unsigned char playerColor = 0;
+#define BLUE 1
+#define GREEN 2
 
-struct player_struct my_player;
+/* max collection of orbs */
+#define MAX_ORBS 24
+#define Y_BOUND 0x80
+unsigned long orbCount = 0;
+/* holds column information of orb[i] */
+unsigned char greenOrbs_arr[MAX_ORBS] = { 0 };
+unsigned char blueOrbs_arr[MAX_ORBS] = { 0 };
+/* holds row information of orb[i] */
+unsigned char yControl_arr[MAX_ORBS];
 
-unsigned long randomizer_seed = 12345;
-unsigned char random_num = 0;
+/* game modes */
+unsigned char ALT_SPAWN = 0; // alternating orb color generation
+unsigned char BULLET_HELL = 0;
 
 unsigned char DEBUG_MODE = 0;
 

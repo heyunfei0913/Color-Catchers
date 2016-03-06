@@ -127,23 +127,10 @@ enum gameMatrixSubstates {
     Play_Game_SS
     } gameMatrixSubstate = Init_Game_SS;
 
-/* max collection of orbs */
-#define MAX_ORBS 12
-#define Y_BOUND 0x80
-/* holds column information of orb[i] */
-unsigned char greenOrbs = 0;
-unsigned char greenOrbs_arr[MAX_ORBS] = { 0 };
-unsigned char blueOrbs = 0;
-unsigned char blueOrbs_arr[MAX_ORBS] = { 0 };
-/* holds row information of orb[i] */
-unsigned char yControl = 0;
-unsigned char yControl_arr[MAX_ORBS];
-
 #define NUM_COLUMN 8
 #define NUM_COLORS 2
 #define BLUE_ORB 0
 #define GREEN_ORB 1
-unsigned long orbCount = 0;
 static unsigned char blueCount = 0;
 static unsigned char greenCount = 0;
 static unsigned long randSeed = 5294;
@@ -189,14 +176,25 @@ unsigned char pickColor(unsigned char c) {
 }
 
 /* pick random (x) to generate one orb at -- populates array */
-/* tfw no vectors in C */
+/* tfw no vectors in C. feels bad man */
 void generateOrbs() {
+    static unsigned char color = 0;
     if (orbCount < MAX_ORBS) {
         const unsigned char topRow = 0x01;
         unsigned char randomX = rand() % NUM_COLUMN;
         unsigned char columnX = pickColumn(randomX);
-        unsigned char randomColor = rand() % NUM_COLORS;
-        unsigned char color = pickColor(randomColor);
+        if (ALT_SPAWN) {
+            if (color == 0) {
+                color = 1;
+            }
+            else {
+                color = 0;
+            }
+        }
+        else {
+            unsigned char randomColor = rand() % NUM_COLORS;
+            color = pickColor(randomColor);
+        }
         
         // find flagged Y to write to
         for (unsigned i = 0; i < MAX_ORBS; ++i) {
@@ -258,11 +256,18 @@ void displayOrbs() {
             break;
         }
     }
+    /* lowers brightness */
+    clearMatrix();
 }
 
 void displayMatrixGame() {
-    const unsigned short GENERATE_PERIOD = 1000;
-    const unsigned short SHIFT_PERIOD = 750;
+    /* prime periods to avoid awkward generation/shifting */
+    unsigned short GENERATE_PERIOD = 457;
+    unsigned short SHIFT_PERIOD = 263;
+    if (BULLET_HELL) {
+        GENERATE_PERIOD = GENERATE_PERIOD / 4;
+        SHIFT_PERIOD = SHIFT_PERIOD / 4;
+    }
     static unsigned short generateTimer = 0;
     static unsigned short shiftTimer = 0;
     switch(gameMatrixSubstate) {
@@ -291,14 +296,6 @@ void displayMatrixGame() {
     }
 }
 
-void displayMatrixVictory() {
-    
-}
-
-void displayMatrixGameOver() {
-    
-}
-
 void clearMatrix() {
     transmit_data(B_SR, 0x00);
     transmit_data(TOP_SR, 0x00);
@@ -308,6 +305,11 @@ void clearMatrix() {
 void clearGame() {
     startMatrixSubstate = Init_Start_SS;
     gameMatrixSubstate = Init_Game_SS;
+    for (unsigned short i = 0; i < MAX_ORBS; ++i) {
+        greenOrbs_arr[i] = 0;
+        blueOrbs_arr[i] = 0;
+        yControl_arr[i] = 0;
+    }
 }
 
 int matrixTick (int state) {
@@ -332,7 +334,6 @@ int matrixTick (int state) {
             break;
          case(Game_Matrix):
             if (game_ctrl == END_GAME) {
-                clearMatrix();
                 state = End_Matrix;
                 break;
             }
@@ -341,18 +342,10 @@ int matrixTick (int state) {
             break;
          case(End_Matrix):
             if (game_ctrl == RESET_GAME) {
-                clearMatrix();
                 state = Reset_Matrix;
                 break;
             }
-            if (score >= MIN_SCORE) {
-                clearMatrix();
-                displayMatrixVictory();
-            }
-            else {
-                clearMatrix();
-                displayMatrixGameOver();
-            }
+            displayMatrixGame();
             state = End_Matrix;
             break;
          case(Reset_Matrix):

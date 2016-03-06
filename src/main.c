@@ -16,9 +16,10 @@
 
 /* original code */
 #include "Color_Catchers.h"
+#include "Matrix_SM.c"
+#include "Player_Matrix_SM.c"
 #include "LCD_SM.c"
 #include "Button_SM.c"
-#include "Matrix_SM.c"
 
 int main(void) {  
     /* A is used for top and bottom SR */
@@ -29,18 +30,16 @@ int main(void) {
     DDRC = 0xFF; PORTC = 0x00;
     /* Want D2 to be PWM, D5 to D3 are button inputs, D6 and D7 are LCD */
     DDRD = 0xC0; PORTD = 0xFF;
-    
-    /* Debug mode */
-    DEBUG_MODE = 0;
 
     /* LCD Display Task Scheduler */
     const unsigned long myPeriod = 1;
     const unsigned long periodPollButtons = 50;
     const unsigned long periodLCD = 100;
     const unsigned long periodMatrix = 1;
+    const unsigned long periodPlayer = 1;
     
     /* Initialize scheduler */
-    const unsigned short NUM_TASKS = 3;
+    const unsigned short NUM_TASKS = 4;
     task tasks[NUM_TASKS];
     unsigned short i = 0;
     
@@ -48,6 +47,12 @@ int main(void) {
     tasks[i].period = periodMatrix;
     tasks[i].elapsedTime = tasks[i].period;
     tasks[i].TickFct = &matrixTick;
+    ++i;
+    
+    tasks[i].state = Init_Player_Matrix;
+    tasks[i].period = periodPlayer;
+    tasks[i].elapsedTime = tasks[i].period;
+    tasks[i].TickFct = &playerMatrixTick;
     ++i;
     
     tasks[i].state = Init_Poll;

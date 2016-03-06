@@ -3,8 +3,6 @@
 
 void displayMatrixStart();
 void displayMatrixGame();
-void displayMatrixVictory();
-void displayMatrixGameOver();
 
 void displayOrbs();
 void generateOrbs();

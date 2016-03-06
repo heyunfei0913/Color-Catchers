@@ -5,7 +5,7 @@
 
 enum pollButtonsState {
     Init_Poll, 
-    Poll_Start_RELEASE, Poll_Start_HOLD,
+    Poll_Start_RELEASE, Poll_Start_HOLD, Poll_Option_HOLD,
     Poll_Game_RELEASE, Poll_Game_HOLD, 
     Poll_End_RELEASE, Poll_End_HOLD,
     Poll_Reset_HOLD
@@ -23,22 +23,41 @@ int pollButtonsTick (int state) {
             break;
         case(Poll_Start_RELEASE):
             game_ctrl = START_GAME;
+            if (button_L) {
+                ALT_SPAWN = ~ALT_SPAWN;
+                state = Poll_Option_HOLD;
+                break;
+            }
+            else if (button_M) {
+                state = Poll_Start_HOLD;
+                break;
+            }
+            else if (button_R) {
+                BULLET_HELL = ~BULLET_HELL;
+                state = Poll_Option_HOLD;
+                break;
+            }
+            else {
+               state = Poll_Start_RELEASE;
+               break; 
+            }
+        case(Poll_Option_HOLD):
+            if (button_L || button_R || button_M) {
+                state = Poll_Option_HOLD;
+                break;
+            }
+            else {
+                state = Poll_Start_RELEASE;
+                break;
+            }
+        case(Poll_Start_HOLD):
+            game_ctrl = START_GAME;
             if (button_M) {
                 state = Poll_Start_HOLD;
                 break;
             }
             else {
-                state = Poll_Start_RELEASE;
-               break; 
-            }
-        case(Poll_Start_HOLD):
-            game_ctrl = START_GAME;
-            if (!button_M) {
                 state = Poll_Game_RELEASE;
-                break;
-            }
-            else {
-                state = Poll_Start_HOLD;
                 break;
             }
         case(Poll_Game_RELEASE):
@@ -60,13 +79,19 @@ int pollButtonsTick (int state) {
                 break;
             }        
             else if (button_M) {
-                --lives;
-                if (lives == 0) {
-                    state = Poll_End_HOLD;
-                    break;
-                }
-                update_LCD = 1;
+                if (DEBUG_MODE) {
+                    --lives;
+                    if (lives == 0) {
+                        state = Poll_End_HOLD;
+                        break;
+                    }
+                    update_LCD = 1;
+                }         
                 state = Poll_Game_HOLD;
+                break;
+            }
+            else if (lives == 0) {
+                state = Poll_End_RELEASE;
                 break;
             }
             else {

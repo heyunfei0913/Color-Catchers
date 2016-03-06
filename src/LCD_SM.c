@@ -39,7 +39,7 @@ void displayStart() {
     }
 }
 
-void displayScore(unsigned long score) {
+void displayScore(unsigned long m_score) {
     const unsigned char score_string[] = " Score: ";
     unsigned char msg_column = 18;
     for (unsigned char i = 0; i < sizeof(score_string)-1; ++i) {
@@ -47,31 +47,31 @@ void displayScore(unsigned long score) {
         ++msg_column;
     }
     
-    LCD_WriteData(score % 1000000 % 100000 / 10000 + '0' );
-    LCD_WriteData(score % 1000000 % 100000 % 10000 / 1000 + '0' );
-    LCD_WriteData(score % 1000000 % 100000 % 10000 % 1000 / 100 + '0' );
-    LCD_WriteData(score % 1000000 % 100000 % 10000 % 1000 % 100 / 10 + '0' );
-    LCD_WriteData(score % 1000000 % 100000 % 10000 % 1000 % 100 % 10 + '0' );
+    LCD_WriteData(m_score % 1000000 % 100000 / 10000 + '0' );
+    LCD_WriteData(m_score % 1000000 % 100000 % 10000 / 1000 + '0' );
+    LCD_WriteData(m_score % 1000000 % 100000 % 10000 % 1000 / 100 + '0' );
+    LCD_WriteData(m_score % 1000000 % 100000 % 10000 % 1000 % 100 / 10 + '0' );
+    LCD_WriteData(m_score % 1000000 % 100000 % 10000 % 1000 % 100 % 10 + '0' );
 }
 
-void displayLives(unsigned char lives) {
-    if (lives >= 1) {
+void displayLives(unsigned char m_lives) {
+    if (m_lives >= 1) {
         LCD_Cursor(1);
         LCD_WriteData(0b00001000);
     }
-    if (lives >= 2) {
+    if (m_lives >= 2) {
         LCD_Cursor(3);
         LCD_WriteData(0b00001000);
     }
-    if (lives >= 3) {
+    if (m_lives >= 3) {
         LCD_Cursor(5);
         LCD_WriteData(0b00001000);
     }
-    if (lives >= 4) {
+    if (m_lives >= 4) {
         LCD_Cursor(7);
         LCD_WriteData(0b00001000);
     }
-    if (lives >= 5) {
+    if (m_lives >= 5) {
         LCD_Cursor(9);
         LCD_WriteData(0b00001000);
     }
