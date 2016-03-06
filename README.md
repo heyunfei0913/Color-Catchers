@@ -12,10 +12,14 @@ UCR CS120B Project
 
 ## How to Play
 The player is in the bottom row of the LED matrix and must avoid the colored orbs they are not while collecting
-whichever colored orbs they are. The player will change colors throughout the game and the fall speed of the orbs
-will also increase.
+whichever colored orbs they are. The player will change colors throughout the game at regular intervals. To win the player must score
+at least 50 points.
+
+Bullet Hell mode can be turned on and off by pressing the right button in the start menu.
+Alternating color generation can be turned on and off by pressing the left button in the start menu.
+Start the game by pressing the middle button.
 
 ## Bugs
-To be added
+- LCD displays game end screen while matrix is still in start game state
 
 
