@@ -9,9 +9,9 @@
 #define TOP_SR 1
 #define B_SR 2
 
-/* modified to support two SR */
+/* modified to support three SR */
 void transmit_data (unsigned char SR, unsigned char data) {
-    /* BOT_SR uses A0 - A3  -- controls  GREEN, use '~' on data */
+    /* BOT_SR uses A0 - A3  -- controls  GREEN (x), use '~' on data */
     if (SR == BOT_SR) {
         data = ~data;
         for (int i = 7; i >= 0; --i) {
@@ -28,7 +28,7 @@ void transmit_data (unsigned char SR, unsigned char data) {
         // clears all lines in preparation of a new transmission
         PORTA &= 0xF0;
     }
-    /* TOP_SR uses A4 - A7 -- controls BLUE, use '~' on data */
+    /* TOP_SR uses A4 - A7 -- controls BLUE (x), use '~' on data */
     else if (SR == TOP_SR) {
         data = ~data;
         for (int i = 7; i >= 0; --i) {
@@ -45,7 +45,7 @@ void transmit_data (unsigned char SR, unsigned char data) {
         // clears all lines in preparation of a new transmission
         PORTA &= 0x0F;  
     }
-    /* B_SR uses B0 - B3 -- control line, do NOT use '~' on data */
+    /* B_SR uses B0 - B3 -- control line (y), do NOT use '~' on data */
     else if (SR == B_SR) {
         for (int i = 7; i >= 0; --i) {
             // Sets SRCLR to 1 allowing data to be set
