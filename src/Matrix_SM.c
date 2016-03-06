@@ -90,8 +90,8 @@ void displayMatrixStart() {
                 break;
             }
             if (startTimer <= SOLID_STATE ||
-                     startTimer >= SOLID_STATE * 2 &&
-                     startTimer <= SOLID_STATE * 3) {
+                     (startTimer >= SOLID_STATE * 2 &&
+                     startTimer <= SOLID_STATE * 3)) {
                 ballSelect = ballSelect_arr[i];
                 ball = ball_arr[i];
                 clearMatrix();
@@ -131,8 +131,6 @@ enum gameMatrixSubstates {
 #define NUM_COLORS 2
 #define BLUE_ORB 0
 #define GREEN_ORB 1
-static unsigned char blueCount = 0;
-static unsigned char greenCount = 0;
 static unsigned long randSeed = 5294;
 
 unsigned char pickColumn(unsigned char x) {
@@ -158,7 +156,7 @@ unsigned char pickColumn(unsigned char x) {
     else if (x == 6) {
         column = 0x40;
     }
-    else if (x == 7) {
+    else {
         column = 0x80;
     }
     return column;
@@ -169,7 +167,7 @@ unsigned char pickColor(unsigned char c) {
     if (c == 0) {
         color = BLUE_ORB;
     }
-    else if (c == 1) {
+    else  {
         color = GREEN_ORB;
     }
     return color;
@@ -263,7 +261,7 @@ void displayOrbs() {
 void displayMatrixGame() {
     /* prime periods to avoid awkward generation/shifting */
     unsigned short GENERATE_PERIOD = 457;
-    unsigned short SHIFT_PERIOD = 263;
+    unsigned short SHIFT_PERIOD = 307;
     if (BULLET_HELL) {
         GENERATE_PERIOD = GENERATE_PERIOD / 4;
         SHIFT_PERIOD = SHIFT_PERIOD / 4;

@@ -20,12 +20,7 @@ enum game_control {
 unsigned char update_LCD = 0;
 unsigned char moveLeftSignal = 0;
 unsigned char moveRightSignal = 0;
-unsigned char hitSignal = 0;
-
-unsigned short phase_timer = 0;
-#define CHANGE_PERIOD 100
-
-#define BLINK_PERIOD 15
+unsigned char changeSignal = 0; // sfx
 
 /* shared variables */
 unsigned long score = 0;

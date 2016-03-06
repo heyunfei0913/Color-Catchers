@@ -104,7 +104,6 @@ void displayGameOver() {
 }
 
 int lcdTick (int state) {
-    static unsigned short lcdTimer = 0;
     switch(state) {
         case(Init_LCD):
             update_LCD = 1;

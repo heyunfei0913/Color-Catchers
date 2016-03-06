@@ -29,9 +29,11 @@ void displayPlayer() {
 void changeColor() {
     if (playerColor == BLUE) {
         playerColor = GREEN;
+        changeSignal = 1;
     }
     else if (playerColor == GREEN) {
         playerColor = BLUE;
+        changeSignal = 1;
     }
 }
 

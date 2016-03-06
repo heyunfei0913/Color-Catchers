@@ -20,6 +20,7 @@
 #include "Player_Matrix_SM.c"
 #include "LCD_SM.c"
 #include "Button_SM.c"
+#include "SFX_SM.c"
 
 int main(void) {  
     /* A is used for top and bottom SR */
@@ -37,9 +38,10 @@ int main(void) {
     const unsigned long periodLCD = 100;
     const unsigned long periodMatrix = 1;
     const unsigned long periodPlayer = 1;
+    const unsigned long periodSFX = 500;
     
     /* Initialize scheduler */
-    const unsigned short NUM_TASKS = 4;
+    const unsigned short NUM_TASKS = 5;
     task tasks[NUM_TASKS];
     unsigned short i = 0;
     
@@ -61,6 +63,12 @@ int main(void) {
     tasks[i].TickFct = &pollButtonsTick;
     ++i;
     
+    tasks[i].state = Init_SFX;
+    tasks[i].period = periodSFX;
+    tasks[i].elapsedTime = tasks[i].period;
+    tasks[i].TickFct = &sfxTick;
+    ++i;
+    
     tasks[i].state = Init_LCD;
     tasks[i].period = periodLCD;
     tasks[i].elapsedTime = tasks[i].period;
@@ -72,8 +80,9 @@ int main(void) {
     LCD_init();
     TimerSet(myPeriod);
     TimerOn();
+    PWM_on();
     
-    while (1) {     
+    while (1) {
         for (i = 0; i < NUM_TASKS; i++) {
             if (tasks[i].elapsedTime >= tasks[i].period){
                 tasks[i].state = tasks[i].TickFct(tasks[i].state);
