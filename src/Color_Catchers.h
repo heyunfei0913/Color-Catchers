@@ -1,7 +1,9 @@
 #ifndef ___color_catchers_h__
 #define __color_catchers_h__
 
+#define BONUS_LIVES 10
 #define DEFAULT_LIVES 3
+#define MAX_LIVES 5
 unsigned short MIN_SCORE = 50;
 
 /* button input variables */
@@ -21,10 +23,12 @@ unsigned char update_LCD = 0;
 unsigned char moveLeftSignal = 0;
 unsigned char moveRightSignal = 0;
 unsigned char changeSignal = 0; // sfx
+unsigned char oneUpSignal = 0;
 
 /* shared variables */
 unsigned long score = 0;
 unsigned short lives = 0;
+unsigned short scoreLives = 0;
 
 /* player's column and row info */
 unsigned char player_x = 0;

@@ -50,6 +50,7 @@ double AM[3] = { A4, Db5, E5 }; // gameStart
 double CM[3] = { C5, E5, G5 }; // playGameStart
 double phaseChangeSFX[1] = { A4 }; // phaseChange
 double BM[4] = { B4, Eb5, Gb5, Gb5 }; // victory
+double oneUpSFX[3] = { E4, G4, E5 }; // one up
 double Am[4] = { A4, C4, E4, E4}; // game 
 
 int sfxTick (int state) {
@@ -59,12 +60,13 @@ int sfxTick (int state) {
     static unsigned char endSFXFlag = 0;
     static unsigned char i = 0;
     static unsigned char j = 0;
+    static unsigned char k = 0;
     
     switch(state) {
         case(Init_SFX):
             state = StartSFX;
             gameSFXFlag = 0;
-            i = 0; j = 0;
+            i = 0; j = 0; k =0;
             break;
         case(StartSFX):
             if (game_ctrl == PLAY_GAME) {
@@ -98,7 +100,7 @@ int sfxTick (int state) {
                 set_PWM(CM[i]);
                 ++i;
             }
-            else if (changeSignal && gameSFXFlag) {
+            else if (changeSignal && gameSFXFlag && !oneUpSignal) {
                 if (j >= 1) {
                     changeSignal = 0;
                     j = 0;
@@ -110,12 +112,24 @@ int sfxTick (int state) {
                     ++j;
                 }
             }
+            else if (oneUpSignal && gameSFXFlag) {
+                if (k >= 3) {
+                    oneUpSignal = 0;
+                    k = 0;
+                    PWM_off();
+                }
+                else {
+                    PWM_on();
+                    set_PWM(oneUpSFX[k]);
+                    ++k;
+                }
+            }
             state = GameStartSFX;
             break;
         case(EndSFX):
             if (game_ctrl == START_GAME) {
                 PWM_on();
-                i = 0; j = 0;
+                i = 0; j = 0; k = 0;
                 gameSFXFlag = 0;
                 state = START_GAME;
                 break;

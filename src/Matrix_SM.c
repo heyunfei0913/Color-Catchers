@@ -263,8 +263,8 @@ void displayMatrixGame() {
     unsigned short GENERATE_PERIOD = 457;
     unsigned short SHIFT_PERIOD = 307;
     if (BULLET_HELL) {
-        GENERATE_PERIOD = GENERATE_PERIOD / 4;
-        SHIFT_PERIOD = SHIFT_PERIOD / 4;
+        GENERATE_PERIOD = GENERATE_PERIOD / 3;
+        SHIFT_PERIOD = SHIFT_PERIOD / 3;
     }
     static unsigned short generateTimer = 0;
     static unsigned short shiftTimer = 0;

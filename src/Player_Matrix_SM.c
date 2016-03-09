@@ -46,6 +46,12 @@ void detectCollision() {
             if (playerColor == BLUE) {
                 score += 5;
                 update_LCD = 1;
+                ++scoreLives;
+                if (scoreLives == BONUS_LIVES && lives != MAX_LIVES) {
+                    oneUpSignal = 1;
+                    ++lives;
+                    scoreLives = 0;
+                }
                 return;
             }
             else {
@@ -63,6 +69,12 @@ void detectCollision() {
             if (playerColor == GREEN) {
                 score += 5;
                 update_LCD = 1;
+                ++scoreLives;
+                if (scoreLives == BONUS_LIVES && lives != MAX_LIVES) {
+                    oneUpSignal = 1;
+                    ++lives;
+                    scoreLives = 0;
+                }
                 return;
             }
             else {
@@ -94,6 +106,7 @@ int playerMatrixTick (int state) {
         case(Init_Player_Matrix):
             player_x = 0x08;
             playerColor = BLUE;
+            scoreLives = 0;
             state = Start_Player;
             break;
         case(Start_Player):
@@ -138,6 +151,7 @@ int playerMatrixTick (int state) {
             player_x = 0x08;
             playerColor = BLUE;
             phaseChangeTimer = 0;
+            scoreLives = 0;
             state = Start_Player;
             break;
         default:
