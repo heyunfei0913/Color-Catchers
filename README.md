@@ -6,9 +6,8 @@ UCR CS120B Project
 - A0 - A3 controls the green LEDs in the matrix using a shift register, A4 - A7 controls the blue LEDs in the matrix using a shift register
 - B0 - B3 controls the selection of LED's in the matrix
 - B6 controls the sound effects played in-game for denoting color changes, being damaged, victory, and defeat.
-- D2 controls the RGB LED used to denote the current phase of the game
-- D3 - D4 are button inputs
-- D5, D6 and C0 - C7 are used for the LCD display
+- D3 - D5 are button inputs (left, middle, right)
+- D6, D7 and C0 - C7 are used for the LCD display
 
 ## How to Play
 The player is in the bottom row of the LED matrix and must avoid the colored orbs they are not while collecting
