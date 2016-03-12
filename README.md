@@ -21,5 +21,6 @@ Start the game by pressing the middle button.
 ## Bugs
 - LCD displays game end screen while matrix is still in start game state
 - Game state sometimes gets stuck and requires a hard reset
+- Constant switching from "bullet hell" to normal mode may result in infinite lives.
 
 
