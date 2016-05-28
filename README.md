@@ -1,6 +1,9 @@
 # Color-Catchers
 UCR CS120B Project
 
+## Video
+[linkname](https://www.youtube.com/watch?v=I1TSJ78IGaY)
+
 ## Setup
 - Color-Catchers uses an ATMega1284 microcontroller, three shift registers, a speaker, LCD display, and an 8x8 RGB LED matrix.
 - A0 - A3 controls the green LEDs in the matrix using a shift register, A4 - A7 controls the blue LEDs in the matrix using a shift register
